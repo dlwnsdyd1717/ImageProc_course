@@ -51,6 +51,7 @@ BEGIN_MESSAGE_MAP(Cimageproc20210791View, CScrollView)
 	ON_COMMAND(ID_GEOMETRY_ZOOMOUT_SUBSAMPLING, &Cimageproc20210791View::OnGeometryZoomoutSubsampling)
 	ON_COMMAND(ID_GEOMETRY_ZOOMOUT_MEAN_SUB, &Cimageproc20210791View::OnGeometryZoomoutMeanSub)
 	ON_COMMAND(ID_GEOMETRY_AVG_SAMPLING, &Cimageproc20210791View::OnGeometryAvgSampling)
+	ON_COMMAND(ID_GEOMETRY_ROTATION, &Cimageproc20210791View::OnGeometryRotation)
 END_MESSAGE_MAP()
 
 // Cimageproc20210791View 생성/소멸
@@ -1372,6 +1373,79 @@ void Cimageproc20210791View::OnGeometryAvgSampling()
 			}
 			
 		
+		}
+	}
+
+	Invalidate();
+}
+#define PI 3.14 
+
+void Cimageproc20210791View::OnGeometryRotation()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	Cimageproc20210791Doc* pDoc = GetDocument();
+
+	int angle = 30;        //degree
+	int x, y, i, j;
+	float radian;
+	int Cx, Cy, Oy;
+	int xdiff, ydiff, x_source, y_source;
+
+	if (pDoc->gResultImg != NULL) {
+		for (i = 0; i < pDoc->gImageHeight; i++) {
+			free(pDoc->gResultImg[i]);
+		}
+		free(pDoc->gResultImg);
+	}
+
+	radian = 2 * PI / 360 * angle;
+
+	pDoc->gImageWidth = (pDoc->ImageHeight * fabs(cos(PI/2-radian)) + pDoc->ImageWidth * fabs(cos(radian)));
+	pDoc->gImageHeight = pDoc->ImageHeight * fabs(cos(radian)) + pDoc->gImageWidth * fabs(cos(PI / 2 - radian));
+
+	//메모리 할당
+	pDoc->gResultImg = (unsigned char**)malloc(pDoc->gImageHeight * sizeof(unsigned char*));
+
+	for (i = 0; i < pDoc->gImageHeight; i++) {
+		pDoc->gResultImg[i] = (unsigned char*)malloc(pDoc->gImageWidth * pDoc->depth);
+	}
+
+	// 중심점 
+	Cx = pDoc->ImageWidth / 2; Cy = pDoc->ImageHeight / 2;
+	// y의 마지막 좌표
+	Oy = pDoc->ImageHeight - 1;
+	xdiff = (pDoc->gImageWidth - pDoc->ImageWidth) / 2;
+	ydiff = (pDoc->gImageHeight - pDoc->ImageHeight) / 2;
+
+	for (y = -ydiff; y < pDoc->gImageHeight - ydiff; y++) {
+		for (x = -xdiff; x < pDoc->gImageWidth - xdiff; x++) {
+			x_source = (Oy - y - Cy) * sin(radian) + (x - Cx) * cos(radian) + Cx;
+			y_source = Oy - ((Oy - y - Cy) * cos(radian) - (x - Cx) * sin(radian) + Cy);
+
+			//y_source = Oy - y_source;
+
+			if (pDoc->depth == 1) {
+				if (x_source < 0 || x_source > pDoc->ImageWidth - 1 ||
+					y_source < 0 || y_source > pDoc->ImageHeight - 1)
+					pDoc->gResultImg[y + ydiff][x + xdiff] = 255;
+				else {
+					pDoc->gResultImg[y + ydiff][x + xdiff] = pDoc->InputImg[y_source][x_source];
+				}
+			}
+			else {
+				if (x_source < 0 || x_source > pDoc->ImageWidth - 1 ||
+					y_source < 0 || y_source > pDoc->ImageHeight - 1) {
+
+					pDoc->gResultImg[y + ydiff][3 * (x + xdiff) + 0] = 255;
+					pDoc->gResultImg[y + ydiff][3 * (x + xdiff) + 1] = 255;
+					pDoc->gResultImg[y + ydiff][3 * (x + xdiff) + 2] = 255;
+				}
+				else {
+					pDoc->gResultImg[y + ydiff][3 * (x + xdiff) + 0] = pDoc->InputImg[y_source][3 * x_source + 0];
+					pDoc->gResultImg[y + ydiff][3 * (x + xdiff) + 1] = pDoc->InputImg[y_source][3 * x_source + 1];
+					pDoc->gResultImg[y + ydiff][3 * (x + xdiff) + 2] = pDoc->InputImg[y_source][3 * x_source + 2];
+				}
+			}
 		}
 	}
 
