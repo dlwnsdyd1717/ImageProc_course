@@ -176,20 +176,20 @@ void Cimageproc20210791Doc::LoadImageFile(CArchive& ar)
 	CFile* fp = ar.GetFile();
 	CString fname = fp->GetFilePath();  //파일 이름 읽어오기
 	char type[16], buf[256];
-	int MaxValue;
+	int MaxValue, i;
 	bool isbmp = false;
 
 	if (strcmp(strchr(fname, '.'), ".ppm") == 0 || strcmp(strchr(fname, '.'), ".PPM") == 0 ||
 		strcmp(strchr(fname, '.'), ".pgm") == 0 || strcmp(strchr(fname, '.'), ".PGM") == 0) {
 		ar.ReadString(type, 15);  // p5 등이 읽어진다.
 		do {
-			ar.ReadString(buf, 256);   // 그림의 높이 길이가 구해진다
+			ar.ReadString(buf, 255);   // 그림의 높이 길이가 구해진다
 		} while (buf[0] == '#');
 		
 		sscanf_s(buf, "%d %d", &ImageWidth, &ImageHeight);
 		
 		do {
-			ar.ReadString(buf, 256);   // 색상이 구해진다
+			ar.ReadString(buf, 255);   // 색상이 구해진다
 		} while (buf[0] == '#');
 		sscanf_s(buf, "%d ", &MaxValue);
 

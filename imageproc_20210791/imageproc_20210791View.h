@@ -74,6 +74,17 @@ public:
 	afx_msg void OnGeometryZoomoutMeanSub();
 	afx_msg void OnGeometryAvgSampling();
 	afx_msg void OnGeometryRotation();
+	afx_msg void OnGeometryMirror();
+	afx_msg void OnGeometryFlip();
+	afx_msg void OnGeometryWarping();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
+	void OnContextMenu(CWnd*, CPoint point);
+	afx_msg void OnAviView();
+	bool bAviMode;
+	CString AVIFileName;
+	void LoadAviFile(CDC* pDC);
 };
 
 #ifndef _DEBUG  // imageproc_20210791View.cpp의 디버그 버전
